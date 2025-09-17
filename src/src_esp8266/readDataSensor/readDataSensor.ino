@@ -1,25 +1,39 @@
-#include "DHT11Sensor.h"
+#include "sensors/DHT11Sensor.h"
+#include "sensors/DHT11Sensor.cpp"
+#include "core/Type.h"
+#include "core/DataStore.h"
+#include "core/DataStore.cpp"
 
-// Với NodeMCU/ESP8266: D4 = GPIO2. Nếu bạn dùng chân khác, sửa giá trị dưới đây.
 #define DHT_PIN D4
 
 DHT11Sensor sensor(DHT_PIN);
-
+DataStore store;
 void setup() {
   Serial.begin(115200);
   Serial.println();
   Serial.println("=== DHT11 Reader (ESP8266) ===");
   sensor.begin();
+
 }
 
 void loop() {
-  delay(2000);  // DHT11 cần delay giữa các lần đọc
+  delay(2000);
 
   float t, h;
   if (sensor.read(t, h)) {
-    Serial.print("Temperature: "); Serial.print(t); Serial.print(" °C  |  Humidity: ");
-    Serial.print(h); Serial.println(" %");
+
+  EnvReading myhome ( t, h, 1.2 ,80, millis() / 1000);
+
+  //store data after read all sensors.
+  store.set(myhome);
+  
+   //printf data before send to MQTT 
+  Serial.println("[LATEST]");
+  Serial.println(myhome.toJsonString());
+  
   } else {
+
     Serial.println("Sensor read failed!");
+
   }
 }
