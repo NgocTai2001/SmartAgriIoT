@@ -9,9 +9,10 @@ void DHT11Sensor::begin() {
   _dht.begin();
 }
 
-bool DHT11Sensor::read(float &temperatureC, float &humidity) {
-  humidity     = _dht.readHumidity();
-  temperatureC = _dht.readTemperature();
-  if (isnan(humidity) || isnan(temperatureC)) return false;
-  return true;
+float DHT11Sensor::readTemperature() {
+  return _dht.readTemperature();
+}
+
+float DHT11Sensor::readHumidity() {
+  return _dht.readHumidity();
 }

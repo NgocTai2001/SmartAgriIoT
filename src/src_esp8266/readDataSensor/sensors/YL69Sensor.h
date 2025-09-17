@@ -10,8 +10,8 @@ class YL69Sensor {
   
   public:
     YL69Sensor(int aPin, int dPin = -1);
-    int readAnalog();
-    bool readDigital();
+    int readSoilAnalog();
+    bool readSoilDigital();
 };
 
 #endif

@@ -9,11 +9,11 @@ YL69Sensor::YL69Sensor(int aPin, int dPin) {
   }
 }
 
-int YL69Sensor::readAnalog() {
+int YL69Sensor::readSoilAnalog() {
   return analogRead(analogPin);
 }
 
-bool YL69Sensor::readDigital() {
+bool YL69Sensor::readSoilDigital() {
   if (digitalPin == -1) return false;
   return digitalRead(digitalPin) == LOW;
 }

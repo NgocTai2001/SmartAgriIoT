@@ -10,8 +10,8 @@ class LM393LDRSensor {
   
   public:
     LM393LDRSensor(int aPin, int dPin = -1);
-    int readAnalog();
-    bool readDigital();
+  int readLightAnalog();
+  bool readLightDigital();
 };
 
 #endif

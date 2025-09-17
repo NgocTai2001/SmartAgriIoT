@@ -6,12 +6,12 @@ struct EnvReading {
   float temperatureC = NAN;   // temp (°C)
   float humidity     = NAN;   // hum  (%)
   float windSpeed    = NAN;   // wind (m/s)
-  int   lightPercent = -1;    // light (0..100)
+  int   lightPercent = 0;    // light (0..100)
   unsigned long ts   = 0;     // timestamp millis() 
 
   EnvReading()
     : temperatureC(NAN), humidity(NAN), windSpeed(NAN),
-      lightPercent(-1), ts(0) {}
+      lightPercent(0), ts(0) {}
 
   EnvReading(float t, float h, float w, int l, unsigned long timestamp = 0)
     : temperatureC(t), humidity(h), windSpeed(w),

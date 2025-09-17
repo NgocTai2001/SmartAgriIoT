@@ -9,11 +9,11 @@ LM393LDRSensor::LM393LDRSensor(int aPin, int dPin) {
   }
 }
 
-int LM393LDRSensor::readAnalog() {
+int LM393LDRSensor::readLightAnalog() {
   return analogRead(analogPin);
 }
 
-bool LM393LDRSensor::readDigital() {
+bool LM393LDRSensor::readLightDigital() {
   if (digitalPin == -1) return false;
   return digitalRead(digitalPin) == LOW;
 }

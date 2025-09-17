@@ -6,8 +6,8 @@ class DHT11Sensor {
 public:
   explicit DHT11Sensor(uint8_t pin);
   void begin();
-  bool read(float &temperatureC, float &humidity);
-
+  float readTemperature();
+  float readHumidity();
 private:
   uint8_t _pin;
   DHT _dht;
