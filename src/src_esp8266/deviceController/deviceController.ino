@@ -1,31 +1,41 @@
 #include "DeviceController.h"
 
-// WiFi & MQTT settings
-const char* WIFI_SSID     = "YOUR_WIFI_SSID";
-const char* WIFI_PASS     = "YOUR_WIFI_PASSWORD";
-const char* MQTT_SERVER   = "192.168.1.100";
-const int   MQTT_PORT     = 1883;
-const char* MQTT_USER     = "";
-const char* MQTT_PASS     = "";
-const char* DEVICE_TOPIC  = "smartfarm/device/pump";
+// =========================
+// WiFi configuration
+// =========================
+const char* WIFI_SSID  = "VIETTEL_Vyvy";
+const char* WIFI_PASS  = "Vyvyvyvy";
 
-const int RELAY_PIN = D1;
+// =========================
+// MQTT configuration (broker running on Raspberry Pi 3)
+// =========================
+const char* MQTT_SERVER  = "192.168.1.11";   // Replace with Raspberry Pi IP
+const int   MQTT_PORT    = 1883;             // MQTT default port
+const char* MQTT_USER    = "Tnt28122001";    // MQTT username
+const char* MQTT_PASS    = "Tnt28122001!";   // MQTT password
+const char* DEVICE_TOPIC = "dev/test";       // Topic to subscribe/publish
 
+// =========================
+// LED configuration (using built-in LED on ESP8266)
+// =========================
+const int LED_PIN = LED_BUILTIN;   // Built-in LED pin (usually D4 on ESP8266)
+
+// Initialize DeviceController with WiFi + MQTT + LED parameters
 DeviceController controller(
-  WIFI_SSID,
-  WIFI_PASS,
-  MQTT_SERVER,
-  MQTT_PORT,
-  MQTT_USER,
-  MQTT_PASS,
-  DEVICE_TOPIC,
-  RELAY_PIN
+  WIFI_SSID,     // WiFi SSID
+  WIFI_PASS,     // WiFi password
+  MQTT_SERVER,   // MQTT broker address (Raspberry Pi)
+  MQTT_PORT,     // MQTT port
+  MQTT_USER,     // MQTT username
+  MQTT_PASS,     // MQTT password
+  DEVICE_TOPIC,  // Topic for receiving/sending data
+  LED_PIN        // LED pin to control
 );
 
 void setup() {
-  controller.begin();
+  controller.begin();  // Connect WiFi + MQTT + initialize LED
 }
 
 void loop() {
-  controller.loop();
+  controller.loop();   // Keep listening for MQTT messages and handle them
 }

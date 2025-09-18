@@ -1,7 +1,9 @@
 #include "DeviceController.h"
+#include <ArduinoJson.h>
 
 DeviceController* _instance = nullptr;
 
+// Constructor to initialize WiFi, MQTT, and relay settings
 DeviceController::DeviceController(
   const char* ssid,
   const char* password,
@@ -19,7 +21,7 @@ DeviceController::DeviceController(
 
 void DeviceController::begin() {
   pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, HIGH); // default OFF
+  digitalWrite(relayPin, HIGH); // Default OFF (relay not active)
 
   Serial.begin(115200);
   WiFi.begin(ssid, password);
@@ -35,6 +37,7 @@ void DeviceController::begin() {
   client.setCallback(callbackWrapper);
 }
 
+// Wrapper to pass MQTT messages to the instance's handleMessage
 void DeviceController::callbackWrapper(char* topic, byte* payload, unsigned int length) {
   String message;
   for (unsigned int i = 0; i < length; i++) {
@@ -45,27 +48,45 @@ void DeviceController::callbackWrapper(char* topic, byte* payload, unsigned int 
   }
 }
 
+// Handle received MQTT messages
 void DeviceController::handleMessage(char* topic, String message) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("]: ");
   Serial.println(message);
 
-  if (message == "ON") {
-    digitalWrite(relayPin, LOW);
-    Serial.println("Device ON");
-  } else if (message == "OFF") {
-    digitalWrite(relayPin, HIGH);
-    Serial.println("Device OFF");
+  // Parse JSON data
+  StaticJsonDocument<256> doc;
+  DeserializationError error = deserializeJson(doc, message);
+
+  if (error) {
+    Serial.print("JSON parsing failed: ");
+    Serial.println(error.c_str());
+    return;
+  }
+
+  // Extract humidity value from JSON
+  int humidity = doc["hum"];
+  Serial.print("Humidity: ");
+  Serial.println(humidity);
+
+  // Control relay based on humidity
+  if (humidity < 50) {
+    digitalWrite(relayPin, LOW);  // Turn pump ON
+    Serial.println("Pump ON (humidity < 50)");
+  } else {
+    digitalWrite(relayPin, HIGH); // Turn pump OFF
+    Serial.println("Pump OFF (humidity >= 50)");
   }
 }
 
+// Try to reconnect to MQTT broker if disconnected
 void DeviceController::reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     if (client.connect("ESP_DEVICE", mqtt_user, mqtt_pass)) {
       Serial.println("connected");
-      client.subscribe(deviceTopic);
+      client.subscribe(deviceTopic);  // Subscribe to topic after reconnect
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -75,6 +96,7 @@ void DeviceController::reconnect() {
   }
 }
 
+// Main loop to keep MQTT connection alive
 void DeviceController::loop() {
   if (!client.connected()) {
     reconnect();
