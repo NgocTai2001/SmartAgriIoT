@@ -1,0 +1,19 @@
+# VSCode settings
+.vscode/
+
+# Arduino build files
+*.elf
+*.bin
+*.hex
+
+# PlatformIO
+.pio/
+.piolibdeps/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Mac / Linux / Windows system files
+.DS_Store
+Thumbs.db
