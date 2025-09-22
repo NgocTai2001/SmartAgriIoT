@@ -10,7 +10,13 @@ LM393LDRSensor::LM393LDRSensor(int aPin, int dPin) {
 }
 
 int LM393LDRSensor::readLightAnalog() {
-  return analogRead(analogPin);
+  int raw = analogRead(analogPin); // 0–4095 trên ESP32
+  int percent = map(4095 - raw, 0, 4095, 0, 100);
+
+  if (percent < 0) percent = 0;
+  if (percent > 100) percent = 100;
+
+  return percent;
 }
 
 bool LM393LDRSensor::readLightDigital() {

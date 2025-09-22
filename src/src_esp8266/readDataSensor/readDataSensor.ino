@@ -4,7 +4,7 @@
 #include "core/DataStore.cpp"
 #include "sensors/SensorManager.h"
 #include "sensors/SensorManager.cpp"
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 
 // =========================
@@ -16,7 +16,7 @@ const char* password = "Vyvyvyvy";
 // =========================
 // MQTT configuration (broker running on Raspberry Pi 3)
 // =========================
-const char* mqtt_server = "192.168.1.11";   // Replace with the actual Raspberry Pi IP
+const char* mqtt_server = "192.168.1.16";   // Replace with the actual Raspberry Pi IP
 const int   mqtt_port   = 1883;
 const char* mqtt_topic  = "dev/test";
 const char* mqtt_user   = "Tnt28122001";
@@ -27,10 +27,17 @@ const char* mqtt_pass   = "Tnt28122001!";
 // =========================
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-// SensorManager pins: (DHT, Analog light, Relay, Wind, Other, Other, Calibration factor)
-SensorManager sensors(D4, A0, D1, D8, D3, D2, 1.5f);
 DataStore store;
+SensorManager sensors(
+  4,   // DHT11 data pin
+  34,  // YL69 analog output (ADC1)
+  25,  // YL69 digital output
+  35,  // LDR analog output (ADC1)
+  26,  // LDR digital output
+  27,  // Anemometer signal pin
+  0.5f // Calibration factor for wind speed
+);
+
 
 // =========================
 // Connect to WiFi
@@ -60,7 +67,7 @@ void setup_wifi() {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    String clientId = "ESP8266Client-";
+    String clientId = "ESP32Client-";
     clientId += String(random(0xffff), HEX);
 
     // Connect with username/password
@@ -83,7 +90,7 @@ void reconnect() {
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  Serial.println("=== Read data from ESP8266 ===");
+  Serial.println("=== Read data from ESP32 ===");
 
   sensors.begin();                 // Initialize sensors
   setup_wifi();                    // Connect to WiFi
@@ -104,7 +111,7 @@ void loop() {
   // Read data from sensors
   EnvReading myhome(
     sensors.readTemperature(),
-    sensors.readHumidity(),
+    sensors.readSoilAnalog(),
     sensors.readWindSpeed(),
     sensors.readLightAnalog(),
     millis() / 1000  // Timestamp in seconds
