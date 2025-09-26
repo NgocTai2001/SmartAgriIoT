@@ -16,7 +16,7 @@ const char* password = "Vyvyvyvy";
 // =========================
 // MQTT configuration (broker running on Raspberry Pi 3)
 // =========================
-const char* mqtt_server = "192.168.1.16";   // Replace with the actual Raspberry Pi IP
+const char* mqtt_server = "raspberrypi.local";   // Replace with the actual Raspberry Pi IP
 const int   mqtt_port   = 1883;
 const char* mqtt_topic  = "dev/test";
 const char* mqtt_user   = "Tnt28122001";

@@ -9,11 +9,11 @@ const char* WIFI_PASS  = "Vyvyvyvy";
 // =========================
 // MQTT configuration (broker running on Raspberry Pi 3)
 // =========================
-const char* MQTT_SERVER  = "192.168.1.16";   // Replace with Raspberry Pi IP
-const int   MQTT_PORT    = 1883;             // MQTT default port
-const char* MQTT_USER    = "Tnt28122001";    // MQTT username
-const char* MQTT_PASS    = "Tnt28122001!";   // MQTT password
-const char* DEVICE_TOPIC = "dev/test";       // Topic to subscribe/publish
+const char* MQTT_SERVER  = "raspberrypi.local";   
+const int   MQTT_PORT    = 1883;
+const char* MQTT_USER    = "Tnt28122001";
+const char* MQTT_PASS    = "Tnt28122001!";
+const char* DEVICE_TOPIC = "dev/test";
 
 // =========================
 // LED configuration (using built-in LED on ESP8266)

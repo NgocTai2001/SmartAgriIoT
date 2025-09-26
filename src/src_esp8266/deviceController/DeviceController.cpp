@@ -3,7 +3,6 @@
 
 DeviceController* _instance = nullptr;
 
-// Constructor to initialize WiFi, MQTT, and relay settings
 DeviceController::DeviceController(
   const char* ssid,
   const char* password,
@@ -21,7 +20,7 @@ DeviceController::DeviceController(
 
 void DeviceController::begin() {
   pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, HIGH); // Default OFF (relay not active)
+  digitalWrite(relayPin, HIGH); // OFF mặc định
 
   Serial.begin(115200);
   WiFi.begin(ssid, password);
@@ -37,7 +36,6 @@ void DeviceController::begin() {
   client.setCallback(callbackWrapper);
 }
 
-// Wrapper to pass MQTT messages to the instance's handleMessage
 void DeviceController::callbackWrapper(char* topic, byte* payload, unsigned int length) {
   String message;
   for (unsigned int i = 0; i < length; i++) {
@@ -48,14 +46,12 @@ void DeviceController::callbackWrapper(char* topic, byte* payload, unsigned int 
   }
 }
 
-// Handle received MQTT messages
 void DeviceController::handleMessage(char* topic, String message) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("]: ");
   Serial.println(message);
 
-  // Parse JSON data
   StaticJsonDocument<256> doc;
   DeserializationError error = deserializeJson(doc, message);
 
@@ -65,41 +61,45 @@ void DeviceController::handleMessage(char* topic, String message) {
     return;
   }
 
-  // Extract humidity value from JSON
+  lastMessageTime = millis();
   int humidity = doc["hum"];
   Serial.print("Humidity: ");
   Serial.println(humidity);
 
-  // Control relay based on humidity
   if (humidity < 50) {
-    digitalWrite(relayPin, LOW);  // Turn pump ON
+    digitalWrite(relayPin, LOW);
     Serial.println("Pump ON (humidity < 50)");
   } else {
-    digitalWrite(relayPin, HIGH); // Turn pump OFF
+    digitalWrite(relayPin, HIGH);
     Serial.println("Pump OFF (humidity >= 50)");
   }
 }
 
-// Try to reconnect to MQTT broker if disconnected
 void DeviceController::reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     if (client.connect("ESP_DEVICE", mqtt_user, mqtt_pass)) {
       Serial.println("connected");
-      client.subscribe(deviceTopic);  // Subscribe to topic after reconnect
+      client.subscribe(deviceTopic);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
+      digitalWrite(relayPin, HIGH); 
       delay(5000);
     }
   }
 }
 
-// Main loop to keep MQTT connection alive
 void DeviceController::loop() {
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
+
+  // check timeout 
+  if (millis() - lastMessageTime > DATA_TIMEOUT) {
+    digitalWrite(relayPin, HIGH); // fail-safe: OFF bơm
+    Serial.println("Pump OFF (timeout - no new data)");
+  }
 }

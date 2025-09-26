@@ -18,7 +18,8 @@ class DeviceController {
 
     WiFiClient espClient;
     PubSubClient client;
-
+    unsigned long lastMessageTime;  
+    static const unsigned long DATA_TIMEOUT = 30000; // 30 giây
     static void callbackWrapper(char* topic, byte* payload, unsigned int length);
     void handleMessage(char* topic, String message);
 
