@@ -8,14 +8,11 @@ struct EnvReading {
   float windSpeed    = NAN;   // wind (m/s)
   int   lightPercent = 0;    // light (0..100)
   unsigned long ts   = 0;     // timestamp millis() 
+  int Soil         = NAN;
 
-  EnvReading()
-    : temperatureC(NAN), humidity(NAN), windSpeed(NAN),
-      lightPercent(0), ts(0) {}
-
-  EnvReading(float t, float h, float w, int l, unsigned long timestamp = 0)
+  EnvReading(float t =0, float h = 0, float w = 0, int l = 0, unsigned long timestamp = 0, int S = 0)
     : temperatureC(t), humidity(h), windSpeed(w),
-      lightPercent(l), ts(timestamp) {}
+      lightPercent(l), ts(timestamp), Soil(S) {}
 
   // data to json that connect to MQTT sever
   void toJsonDoc(JsonDocument& doc) const {
@@ -25,6 +22,7 @@ struct EnvReading {
     if (!isnan(humidity))     doc["hum"]   = humidity;
     if (!isnan(windSpeed))    doc["wind"]  = windSpeed;
     if (lightPercent >= 0)    doc["light"] = lightPercent;
+    if (!isnan(Soil))         doc["Soil"]   = Soil;
   }
 
   // get data to String 

@@ -111,10 +111,11 @@ void loop() {
   // Read data from sensors
   EnvReading myhome(
     sensors.readTemperature(),
-    sensors.readSoilAnalog(),
+    sensors.readHumidity(),
     sensors.readWindSpeed(),
     sensors.readLightAnalog(),
-    millis() / 1000  // Timestamp in seconds
+    millis() / 1000 , // Timestamp in seconds,
+    sensors.readSoilAnalog()
   );
 
   store.set(myhome); // Save reading in datastore

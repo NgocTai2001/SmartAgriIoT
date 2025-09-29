@@ -62,16 +62,16 @@ void DeviceController::handleMessage(char* topic, String message) {
   }
 
   lastMessageTime = millis();
-  int humidity = doc["hum"];
-  Serial.print("Humidity: ");
-  Serial.println(humidity);
+  int Soil = doc["Soil"];
+  Serial.print("Soil: ");
+  Serial.println(Soil);
 
-  if (humidity < 50) {
+  if (Soil < 50) {
     digitalWrite(relayPin, LOW);
-    Serial.println("Pump ON (humidity < 50)");
+    Serial.println("Pump ON (Soil < 50)");
   } else {
     digitalWrite(relayPin, HIGH);
-    Serial.println("Pump OFF (humidity >= 50)");
+    Serial.println("Pump OFF (Soil >= 50)");
   }
 }
 
