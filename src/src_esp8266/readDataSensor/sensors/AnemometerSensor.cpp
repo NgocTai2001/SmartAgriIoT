@@ -1,42 +1,24 @@
 #include "AnemometerSensor.h"
 
-AnemometerSensor::AnemometerSensor(int inputPin, float factor) {
-  pin = inputPin;
-  pulseCount = 0;
-  lastTime = 0;
+AnemometerSensor::AnemometerSensor(int analogPin, float factor) {
+  pin = analogPin;
   calibrationFactor = factor;
 }
 
 void AnemometerSensor::begin() {
-  pinMode(pin, INPUT_PULLUP);
-  attachInterruptArg(digitalPinToInterrupt(pin), handleInterruptWrapper, this, FALLING);
-}
-
-void IRAM_ATTR AnemometerSensor::handleInterruptWrapper(void* arg) {
-  AnemometerSensor* sensor = static_cast<AnemometerSensor*>(arg);
-  sensor->handleInterrupt();
-}
-
-void AnemometerSensor::handleInterrupt() {
-  pulseCount++;
 }
 
 float AnemometerSensor::readWindSpeed() {
-  unsigned long currentTime = millis();
-  unsigned long elapsed = currentTime - lastTime;
+    int adcValue = analogRead(pin);
+    float voltage = (adcValue / 4095.0) * 3.3;  // Convert ADC value to actual voltage
 
-  if (elapsed < 1000) return -1; // wait at least 1s for a stable reading
+    // Clamp the voltage within the sensor's valid operating range
+    if (voltage < 0) voltage = 0;
+    if (voltage > 1.5) voltage = 1.5;
 
-  float frequency = (pulseCount * 1000.0) / elapsed;
-  float windSpeed = frequency / calibrationFactor;
+    // Convert voltage to wind speed (m/s)
+    // Assuming 1.5V corresponds to a maximum wind speed of value calibrationFactor
+    float windSpeed = (voltage / 1.5) * calibrationFactor;
 
-  lastTime = currentTime;
-  pulseCount = 0;
-
-  return windSpeed;
-}
-
-void AnemometerSensor::reset() {
-  pulseCount = 0;
-  lastTime = millis();
+    return windSpeed;
 }

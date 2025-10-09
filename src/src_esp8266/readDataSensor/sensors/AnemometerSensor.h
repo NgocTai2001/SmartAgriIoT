@@ -1,23 +1,19 @@
-#ifndef ANEMOMETERSENSOR_H
-#define ANEMOMETERSENSOR_H
+#ifndef ANEMOMETER_SENSOR_H
+#define ANEMOMETER_SENSOR_H
 
 #include <Arduino.h>
 
 class AnemometerSensor {
   private:
     int pin;
-    volatile unsigned long pulseCount;
-    unsigned long lastTime;
-    float calibrationFactor; // pulses per second per m/s
-
-    static void IRAM_ATTR handleInterruptWrapper(void* arg);
+    float calibrationFactor; // Conversion factor (m/s per Volt)
 
   public:
-    AnemometerSensor(int inputPin, float factor = 1.0f);
+    AnemometerSensor(int analogPin, float factor);
     void begin();
-    void handleInterrupt();
-    float readWindSpeed(); // m/s
-    void reset();
+
+    // Function to read wind speed (m/s)
+    float readWindSpeed();
 };
 
 #endif

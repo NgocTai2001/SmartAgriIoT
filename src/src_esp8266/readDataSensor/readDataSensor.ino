@@ -34,8 +34,8 @@ SensorManager sensors(
   25,  // YL69 digital output
   35,  // LDR analog output (ADC1)
   26,  // LDR digital output
-  27,  // Anemometer signal pin
-  0.5f // Calibration factor for wind speed
+  32,  // Anemometer signal pin
+  100 // Calibration factor for wind speed
 );
 
 
