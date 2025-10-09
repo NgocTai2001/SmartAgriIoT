@@ -6,126 +6,63 @@
 #include "sensors/SensorManager.cpp"
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "network/WiFiConnector.h"
+#include "network/MQTTConnector.h"
 
-// =========================
-// WiFi configuration
-// =========================
-const char* ssid = "VIETTEL_Vyvy";
-const char* password = "Vyvyvyvy";
-
-// =========================
-// MQTT configuration (broker running on Raspberry Pi 3)
-// =========================
-const char* mqtt_server = "raspberrypi.local";   // Replace with the actual Raspberry Pi IP
-const int   mqtt_port   = 1883;
-const char* mqtt_topic  = "dev/test";
-const char* mqtt_user   = "Tnt28122001";
-const char* mqtt_pass   = "Tnt28122001!";
-
-// =========================
-// Create WiFi and MQTT clients
-// =========================
-WiFiClient espClient;
-PubSubClient client(espClient);
-DataStore store;
-SensorManager sensors(
-  4,   // DHT11 data pin
-  34,  // YL69 analog output (ADC1)
-  25,  // YL69 digital output
-  35,  // LDR analog output (ADC1)
-  26,  // LDR digital output
-  32,  // Anemometer signal pin
-  100 // Calibration factor for wind speed
+// ==============================
+// Object initialization
+// ==============================
+WiFiConnector wifi;    // Handles WiFi connection logic
+MQTTConnector mqtt;    // Handles MQTT connection logic
+DataStore store;       // Stores sensor readings temporarily
+SensorManager sensors( // Manages all sensors on the ESP32
+  PIN_DHT,
+  PIN_SOIL_ANALOG,
+  PIN_SOIL_DIGITAL,
+  PIN_LIGHT_ANALOG,
+  PIN_LIGHT_DIGITAL,
+  PIN_WIND,
+  WIND_CALIBRATION
 );
 
-
-// =========================
-// Connect to WiFi
-// =========================
-void setup_wifi() {
-  delay(10);
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-// =========================
-// Reconnect to MQTT if disconnected
-// =========================
-void reconnect() {
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    String clientId = "ESP32Client-";
-    clientId += String(random(0xffff), HEX);
-
-    // Connect with username/password
-    if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass)) {
-      Serial.println("Connected to MQTT broker");
-      // Subscribe to a topic if you need to receive commands from broker
-      // client.subscribe("dev/control");
-    } else {
-      Serial.print("Failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" => try again in 5 seconds");
-      delay(5000);
-    }
-  }
-}
-
-// =========================
-// Setup function
-// =========================
+// ==============================
+// Setup function (runs once)
+// ==============================
 void setup() {
   Serial.begin(115200);
-  Serial.println();
-  Serial.println("=== Read data from ESP32 ===");
-
-  sensors.begin();                 // Initialize sensors
-  setup_wifi();                    // Connect to WiFi
-  client.setServer(mqtt_server, mqtt_port);  // Setup MQTT broker info
+  Serial.println("\n=== Smart Agriculture Internet of Things ===");
+  sensors.begin();   // Initialize all sensors
+  wifi.begin();      // Connect to WiFi network
+  mqtt.begin();      // Configure and connect to MQTT broker
 }
 
-// =========================
-// Main loop
-// =========================
+// ==============================
+// Main loop (runs repeatedly)
+// ==============================
 void loop() {
-  if (!client.connected()) {
-    reconnect(); // Ensure MQTT connection
-  }
-  client.loop();
+  // Ensure WiFi and MQTT connections remain active
+  wifi.reconnect();
+  mqtt.loop();
 
-  delay(1000); // Sampling interval
+  delay(1000); // Sampling interval (1 second)
 
-  // Read data from sensors
-  EnvReading myhome(
+  // Read all sensor values
+  EnvReading data(
     sensors.readTemperature(),
     sensors.readHumidity(),
     sensors.readWindSpeed(),
     sensors.readLightAnalog(),
-    millis() / 1000 , // Timestamp in seconds,
+    millis() / 1000,  // Timestamp in seconds
     sensors.readSoilAnalog()
   );
 
-  store.set(myhome); // Save reading in datastore
+  // Store and convert readings to JSON
+  store.set(data);
+  String json = store.toJsonString();
 
-  // Convert to JSON string
-  String jsonData = store.toJsonString();
+  // Print sensor data to Serial Monitor
+  Serial.println(json);
 
-  Serial.print("Read data: ");
-  Serial.println(jsonData);
-
-  // Publish JSON to MQTT topic
-  client.publish(mqtt_topic, jsonData.c_str());
+  // Publish JSON data to MQTT topic
+  mqtt.publish(json);
 }
