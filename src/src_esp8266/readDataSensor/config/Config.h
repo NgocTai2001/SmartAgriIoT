@@ -3,7 +3,7 @@
 
 /* ================== DEVICE INFO ================== */
 #ifndef DEVICE_ID
-#define DEVICE_ID "ESP32 Smart Garden"
+#define DEVICE_ID "==== Smart Agriculture Internet of Things ==="
 #endif
 
 /* ================== WIFI CONFIG ================== */

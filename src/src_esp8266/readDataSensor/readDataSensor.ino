@@ -7,7 +7,10 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "network/WiFiConnector.h"
+#include "network/WiFiConnector.cpp"
 #include "network/MQTTConnector.h"
+#include "network/MQTTConnector.cpp"
+
 
 // ==============================
 // Object initialization
