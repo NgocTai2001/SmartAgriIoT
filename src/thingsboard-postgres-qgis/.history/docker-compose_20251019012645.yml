@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: thingsboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - ./data/pgadmin:/var/lib/pgadmin
+
+  fetcher:
+    build:
+      context: ./fetcher
+      dockerfile: Dockerfile
+    container_name: fetcher
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      THINGSBOARD_URL: "https://thingsboard.cloud"
+      DEVICE_ID: "your_device_id_here"
+      JWT_TOKEN: "your_jwt_token_here"
+      KEYS: "temp,hum,light,wind"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: thingsboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      FETCH_INTERVAL: 10
+    volumes:
+      - ./fetcher:/app
