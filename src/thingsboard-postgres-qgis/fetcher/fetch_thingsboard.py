@@ -2,6 +2,7 @@ import os
 import io
 import sys
 import json
+import time
 from dotenv import load_dotenv
 import psycopg2
 import requests
@@ -26,7 +27,7 @@ DB_USER = os.getenv("POSTGRES_USER")
 DB_PASS = os.getenv("POSTGRES_PASSWORD")
 
 # --- Fetcher configuration ---
-FETCH_INTERVAL = int(os.getenv("FETCH_INTERVAL", 10))
+FETCH_INTERVAL = int(os.getenv("FETCH_INTERVAL", 5))
 
 # Debug print to verify environment loading
 print("ThingsBoard URL:", THINGSBOARD_URL)
@@ -96,8 +97,8 @@ if __name__ == "__main__":
     conn = connect_db()
     create_table(conn)
 
-    data = fetch_data()
-    if data:
-        save_to_db(conn, data)
-
-    conn.close()
+    while True:
+        data = fetch_data()
+        if data:
+            save_to_db(conn, data)
+        time.sleep(FETCH_INTERVAL)  # đợi 10 giây trước khi fetch lần tiếp theo
