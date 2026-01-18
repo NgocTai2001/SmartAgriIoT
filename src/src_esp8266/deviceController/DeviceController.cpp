@@ -22,16 +22,6 @@ void DeviceController::begin() {
   pinMode(relayPin, OUTPUT);
   digitalWrite(relayPin, HIGH); // OFF mặc định
 
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
-
-  Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println(" connected");
-
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callbackWrapper);
 }

@@ -1,4 +1,5 @@
 #include "DeviceController.h"
+#include "ThingsBoardService.h"
 
 // =========================
 // WiFi configuration
@@ -33,9 +34,38 @@ DeviceController controller(
 );
 
 void setup() {
+  Serial.begin(115200);
   controller.begin();  // Connect WiFi + MQTT + initialize LED
+  TB_Init();
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println(" connected");
+
 }
 
 void loop() {
-  controller.loop();   // Keep listening for MQTT messages and handle them
+
+  TB_Loop(); 
+  if (autoModeFlag) {
+    Serial.println("CHE DO MANUAL");
+    if(pumpStateFlag)
+    {
+      Serial.println("Bat Bom Tu ThingBoard");
+      digitalWrite(RELAY_PIN, LOW);
+    }
+    else{
+      Serial.println("Tat Bom Tu ThingBoard");
+       digitalWrite(RELAY_PIN, HIGH); // OFF mặc định
+    }
+  } 
+  else {
+    controller.loop();   // MQTT
+    Serial.println("CHE DO TU DONG");
+  }
+  delay(500);
 }
